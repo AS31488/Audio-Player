@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio Player</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body{
+    background-color:#f0f7f4;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    font-family:Arial, sans-serif;
+}
+
+.player{
+    text-align:center;
+}
+
+.album-art{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    background-color:#e0e0e0;
+    border:3px solid #009688;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:0 auto;
+    color:#b0b0b0;
+    font-size:18px;
+    overflow:hidden;
+}
+
+.album-art img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+}
+
+.song-title{
+    margin-top:20px;
+    font-size:20px;
+    color:#009688;
+}
+
+.controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-top:20px;
+}
+
+.controls i{
+    font-size:24px;
+    color:#009688;
+    margin:0 20px;
+    cursor:pointer;
+}
+
+.controls i.shuffle, .controls i.repeat{
+    color:#ff9800;
+}
+
+.progress-bar{
+    width:300px;
+    height:5px;
+    background-color:#ff9800;
+    border-radius:5px;
+    position:relative;
+    margin:20px auto;
+}
+
+.progress{
+    width:0;
+    height:100%;
+    background-color:#009688;
+    border-radius:5px;
+    position:relative;
+}
+
+.progress:after{
+    content: '';
+    width:12px;
+    height:12px;
+    background-color:#009688;
+    border-radius:50%;
+    position:absolute;
+    top:50%;
+    right:0;
+    transform:translate(50%,-50%);
+}
+
+.time{
+    display:flex;
+    justify-content:space-between;
+    margin-top:-10px;
+    font-size:12px;
+    color:#ff9800;
+}
+    </style>
+  </head>
+  <body>
+    <div class="player">
+      <div class="album-art">
+        <img
+          alt="Album Cover"
+          height="200"
+          id="album-cover"
+          src="images/Nobody's Woman.jpg"
+        />
+      </div>
+      <div class="song-title">Title of Song here</div>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+      <div class="time">
+        <span class="current-time"> 0:00 </span>
+        <span class="duration"> 0:00 </span>
+      </div>
+      <div class="controls">
+        <i class="fas fa-random shuffle">
+        </i>
+        <i class="fas fa-step-backward" onclick="prevSong()">
+        </i>
+        <i class="fas fa-play-circle play-pause" onclick="playPauseSong()">
+        </i>
+        <i class="fas fa-step-forward" onclick="nextSong()">
+        </i>
+        <i class="fas fa-redo repeat">
+        </i>
+      </div>
+    </div>
+    <audio id="audio"></audio>
+    <script>
+      const songs =[
+    {
+        title:"Nobody's Woman",
+        src:"media/Alan Palomo - Nobody s Woman (Official Audio).mp3",
+        cover:"images/Nobody's Woman.jpg",
+        duration:"4:19",
+    },
+
+    {
+        title:"Best For You and Me",
+        src:"media/Helado Negro Best For You And Me.mp3",
+        cover:"images/Best For You Me.jpg",
+        duration:"3:05",
+    },
+
+    {
+        title:"The Tower",
+        src:"media/Future Islands - The Tower.mp3",
+        cover:"images/The Tower.jpg",
+        duration:"3:39",
+    },
+
+    {
+        title:"Eucalyptus",
+        src:"media/The National - Eucalyptus (Lyric Video).mp3",
+        cover:"images/Eucalyptus.jpg",
+        duration:"4:43",
+    },
+
+    {
+        title:"In the Modern World",
+        src:"media/Fontaines D.C. - In The Modern World.mp3",
+        cover:"images/In the Modern World.jpg",
+        duration:"4:27",
+    },
+
+    {
+        title:"Airdrop",
+        src:"media/Real Estate - Airdrop (Official Audio).mp3",
+        cover:"images/Airdrop.jpg",
+        duration:"3:11",
+    },
+
+    {
+        title:"Long Grass",
+        src:"media/Long Grass.mp3",
+        cover:"media/Long Grass.mp3",
+        duration:"5:09",
+    },
+
+    {
+        title:"Joker Lips",
+        src:"media/MJ Lenderman - Joker Lips.mp3",
+        cover:"images/Joker Lips.jpg",
+        duration:"3:02",
+    },
+
+    {
+        title:"My Babe",
+        src:"media/Spoon -  My Babe  (Official Audio).mp3",
+        cover:"images/My Babe.jpg",
+        duration:"3:47",
+    },
+
+    {
+        title:"Golden Restless Age",
+        src:"media/Kings Of Leon - Golden Restless Age (Audio).mp3",
+        cover:"images/Golden Restless Age.jpg",
+        duration:"4:35",
+    },
+
+];
+
+let currentSongIndex = 0;
+const audio = document.getElementById('audio');
+const songTitle = document.querySelector('.song-title');
+const currentTimeElement = document.querySelector('.current-time');
+const durationElement = document.querySelector('.duration');
+const progressBar = document.querySelector('.progress');
+const playPauseIcon = document.querySelector('.play-pause');
+const albumcover = document.getElementById('album-cover');
+
+function loadSong(index){
+    const song = songs[index];
+    audio.src = song.src;
+    songTitle.textContent = song.title;
+    durationElement.textContent = song.duration;
+    albumcover.src=song.cover;
+}
+
+function playPauseSong(){
+    if(audio.paused) {
+        audio.play();
+        playPauseIcon.classList.remove('fa-play-circle');
+        playPauseIcon.classList.add('fa-pause-circle');
+    }else{
+        audio.pause();
+        playPauseIcon.classList.remove('fa-pause-circle');
+        playPauseIcon.classList.add('fa-play-circle');
+
+    }
+}
+
+function nextSong(){
+ currentSongIndex = (currentSongIndex + 1 ) % songs.length;
+ loadSong(currentSongIndex);
+ audio.play();
+}
+
+function prevSong(){
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    loadSong(currentSongIndex);
+    audio.play();
+}
+
+audio.addEventListener('timeupdate', () => {
+    const currentTime = audio.currentTime;
+    const duration = audio.duration;
+    const progressPercent = (currentTime / duration) * 100;
+    progressBar.style.width = `${progressPercent}%`;
+
+    const minutes = Math.floor(currentTime / 60);
+    const seconds = Math.floor(currentTime % 60);
+    currentTimeElement.textContent = `${minutes} : ${seconds < 10 ? '0' : ''}${seconds}`;
+
+});
+
+audio.addEventListener('ended', nextSong);
+
+loadSong(currentSongIndex);
+    </script>
+  </body>
+</html>
